@@ -32,8 +32,8 @@ CREATE TABLE IF NOT EXISTS besucher (
   PRIMARY KEY (tag, besucher_hash)
 );
 
--- The salt of the current day. The first count of a new day deletes all
--- older rows, so yesterday's hashes can't be reversed by anyone.
+-- The salt of the current day. Every request deletes older rows, and a daily
+-- schedule covers quiet days, so yesterday's hashes can't be reversed by anyone.
 CREATE TABLE IF NOT EXISTS salz (
   tag  TEXT PRIMARY KEY,
   wert TEXT NOT NULL

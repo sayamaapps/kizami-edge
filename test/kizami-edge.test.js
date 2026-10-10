@@ -182,3 +182,35 @@ test("schema runs twice without error (existing databases can be upgraded)", asy
   const { readFileSync } = await import("node:fs");
   db.sqlite.exec(readFileSync(new URL("../schema.sql", import.meta.url), "utf8"));
 });
+
+/* --- the salt must not outlive its day, even without counted visits --- */
+
+test("any request deletes yesterday's salt, also one that isn't counted", async () => {
+  for (const request of [
+    navigation(undefined, { "user-agent": "Mozilla/5.0 (compatible; Googlebot/2.1)" }),
+    navigation("https://example.de/robots.txt"),
+    navigation(undefined, {}, "HEAD"),
+    navigation(undefined, { "sec-gpc": "1" }),
+  ]) {
+    const db = testDatabase();
+    db.sqlite.exec("INSERT INTO salz (tag, wert) VALUES ('2000-01-01', 'old')");
+    await serve(middleware(), request, { DB: db });
+    assert.deepEqual(db.rows("SELECT tag FROM salz"), [], `left a salt after ${request.method} ${request.url}`);
+    assert.equal(db.rows("SELECT COUNT(*) n FROM ereignisse")[0].n, 0, "nothing counted");
+  }
+});
+
+test("a beacon request deletes yesterday's salt, even from a bot", async () => {
+  const db = testDatabase();
+  db.sqlite.exec("INSERT INTO salz (tag, wert) VALUES ('2000-01-01', 'old')");
+  const { onRequestPost } = beacon();
+  await onRequestPost({ request: post({}, { "user-agent": "curl/8.0" }), env: { DB: db } });
+  assert.deepEqual(db.rows("SELECT tag FROM salz"), []);
+});
+
+test("today's salt survives the cleanup", async () => {
+  const db = testDatabase();
+  await record(db, navigation());
+  await serve(middleware(), navigation("https://example.de/robots.txt"), { DB: db });
+  assert.equal(db.rows("SELECT COUNT(*) n FROM salz")[0].n, 1);
+});

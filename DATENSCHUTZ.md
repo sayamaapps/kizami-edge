@@ -14,8 +14,9 @@ Stunde, das Land und, falls Ihr Browser es mitteilt, nur der Name der Website, v
 
 Ihre IP-Adresse wird **nicht gespeichert**. Sie wird zusammen mit der Kennung Ihres Browsers und
 einem Zufallswert, der nur für den laufenden Tag existiert, zu einer Prüfsumme verrechnet. Diese
-erkennt lediglich Mehrfachaufrufe am selben Tag. Der Zufallswert wird am Folgetag gelöscht; danach
-lässt sich die Prüfsumme niemandem mehr zuordnen. Mit aktivierter Einstellung „Do Not Track“ oder
+erkennt lediglich Mehrfachaufrufe am selben Tag. Der Zufallswert wird am Folgetag gelöscht (beim
+ersten Aufruf der Website, spätestens durch einen täglichen Zeitplan); danach lässt sich die
+Prüfsumme niemandem mehr zuordnen. Mit aktivierter Einstellung „Do Not Track“ oder
 „Global Privacy Control“ wird nichts erfasst.
 
 Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO; das berechtigte Interesse liegt darin, zu wissen,

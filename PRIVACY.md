@@ -11,8 +11,9 @@ For a privacy policy. Adapt to your site; not legal advice. German text: [DATENS
 | one 16-character hash per visitor and day | anything that links one day to the next |
 
 - The hash is SHA-256 of `salt | day | IP | user agent`, truncated. The salt is random and exists
-  for one day: the first count of the next day deletes it. From then on the hash can't be traced
-  back to an IP address, and two days of the same visitor can't be linked.
+  for one day: the first request of the next day deletes it, and a daily schedule does so on days
+  without any request. From then on the hash can't be traced back to an IP address, and two days
+  of the same visitor can't be linked.
 - `DNT: 1` and `Sec-GPC: 1`: nothing is recorded.
 - Rows older than 400 days are deleted on every count.
 - Legal basis under the GDPR is typically Art. 6(1)(f), legitimate interest in knowing whether the

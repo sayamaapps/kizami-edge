@@ -11,9 +11,10 @@
  *   - No cookies, no browser storage, no third parties.
  *   - The IP address is never stored. It goes into a SHA-256 hash together
  *     with the user agent, the day and a random salt that exists for that
- *     day only. The first count of a new day deletes all older salts, so
- *     from then on yesterday's hashes cannot be reversed or linked -- not
- *     even by whoever runs the database.
+ *     day only. Every request deletes all older salts (forgetOldSalts), so
+ *     from the first request of a new day on, yesterday's hashes cannot be
+ *     reversed or linked -- not even by whoever runs the database. A daily
+ *     schedule covers days without any request (README, Set up).
  *   - Of the referrer only the host is kept, never the URL (which can carry
  *     search terms). Time is kept to the hour.
  *   - DNT: 1 and Sec-GPC: 1 are honoured: nothing is recorded.
@@ -93,6 +94,22 @@ export async function daySalt(db, day) {
   return row.wert;
 }
 
+/**
+ * Deletes every salt older than today. Runs on EVERY request the site gets
+ * (bots, robots.txt, HEAD, pages.dev included), not only on counted ones:
+ * otherwise a quiet day would keep yesterday's salt -- and yesterday's
+ * hashes reversible -- until the next counted visit. Costs nothing when
+ * there is nothing to delete. Sites with very little traffic should also
+ * run this on a daily schedule (see README).
+ */
+export async function forgetOldSalts(db, now = new Date()) {
+  try {
+    await db.prepare("DELETE FROM salz WHERE tag < ?").bind(utcDay(now)).run();
+  } catch (error) {
+    console.error("kizami-edge: old salts not deleted:", error);
+  }
+}
+
 /** SHA-256 of salt, day, IP and user agent; 16 hex characters remain. */
 export async function dayHash(salt, day, ip, userAgent) {
   const data = new TextEncoder().encode(`${salt}|${day}|${ip}|${userAgent}`);
@@ -168,6 +185,7 @@ export function middleware(options = {}) {
     const response = await context.next();
     try {
       const db = context.env?.[binding];
+      if (db) context.waitUntil(forgetOldSalts(db));
       if (db && isPageView(context.request, response.status, options)) {
         const url = new URL(context.request.url);
         const source = referrerHost(context.request.headers.get("referer"), url.host);
@@ -201,6 +219,7 @@ export function beacon({ events = [PAGE_VIEW], detail = sitePath, binding = "DB"
 
   async function onRequestPost({ request, env }) {
     const db = env?.[binding];
+    if (db) await forgetOldSalts(db);
     if (!db || optedOut(request.headers) || looksLikeBot(request.headers.get("user-agent"))) {
       return new Response(null, { status: 204 });
     }

@@ -1,13 +1,32 @@
 {
   "name": "kizami-edge",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Cookieless visitor counting for Cloudflare Pages Functions and D1. No browser script, no IP stored, salt lives one day.",
   "type": "module",
   "exports": "./src/index.js",
-  "files": ["src", "schema.sql", "PRIVACY.md", "DATENSCHUTZ.md"],
-  "scripts": { "test": "node --test --disable-warning=ExperimentalWarning test/*.test.js" },
-  "engines": { "node": ">=22.13" },
+  "files": [
+    "src",
+    "schema.sql",
+    "PRIVACY.md",
+    "DATENSCHUTZ.md"
+  ],
+  "scripts": {
+    "test": "node --test --disable-warning=ExperimentalWarning test/*.test.js"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
   "license": "MIT",
-  "repository": { "type": "git", "url": "git+https://github.com/simsimmal/kizami-edge.git" },
-  "keywords": ["analytics", "privacy", "cookieless", "cloudflare-pages", "d1", "gdpr"]
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/simsimmal/kizami-edge.git"
+  },
+  "keywords": [
+    "analytics",
+    "privacy",
+    "cookieless",
+    "cloudflare-pages",
+    "d1",
+    "gdpr"
+  ]
 }
