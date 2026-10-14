@@ -108,6 +108,10 @@ processed, ready to adapt for a privacy policy. They are not legal advice.
 npm test   # node --test against real SQLite (node:sqlite), Node 22.13+
 ```
 
+## Maintenance
+
+This module is open source under the MIT license and is maintained for the author's own projects. Issues and pull requests are welcome, but there is no support promise and no release schedule. Report security problems privately through GitHub's private vulnerability reporting (the "Report a vulnerability" button on the Security tab).
+
 ## License
 
 MIT
