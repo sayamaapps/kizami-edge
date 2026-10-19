@@ -1,7 +1,7 @@
 # Kizami Edge
 
 Cookieless visitor counting for [Cloudflare Pages](https://pages.cloudflare.com) Functions and D1.
-The sibling of [Kizami](https://github.com/simsimmal/kirby-kizami) for Kirby: same idea, no PHP.
+The sibling of [Kizami](https://github.com/sayamaapps/kirby-kizami) for Kirby: same idea, no PHP.
 
 - **No cookies, no browser storage, no third parties.** Nothing is stored on the visitor's device.
 - **Can count without any script in the browser.** `middleware()` counts while the page is served,
@@ -20,7 +20,7 @@ The sibling of [Kizami](https://github.com/simsimmal/kirby-kizami) for Kirby: sa
 ## Install
 
 ```sh
-npm install git+https://github.com/simsimmal/kizami-edge.git#v1.0.0
+npm install git+https://github.com/sayamaapps/kizami-edge.git#v1.0.0
 ```
 
 No npm account or token needed; Pages bundles it from `node_modules` on deploy.
@@ -33,7 +33,7 @@ A guard for CI that fails unless the lockfile pins this repository to a full com
 
 ```sh
 node -e 'const p = require("./package-lock.json").packages["node_modules/kizami-edge"];
-if (!/^git\+(ssh:\/\/git@|https:\/\/)github\.com\/simsimmal\/kizami-edge\.git#[0-9a-f]{40}$/.test(p?.resolved || "")) process.exit(1)'
+if (!/^git\+(ssh:\/\/git@|https:\/\/)github\.com\/sayamaapps\/kizami-edge\.git#[0-9a-f]{40}$/.test(p?.resolved || "")) process.exit(1)'
 ```
 
 ## Use
