@@ -13,7 +13,8 @@ Umgebung:
                         (Repo-Secret, Ausgabe von `namenswache.py begriffe --secret`).
                         Leer = Abbruch mit Exit 2.
   BASE_SHA, HEAD_SHA    Commit-Bereich. Leer oder 0000… = alle Commits, die auf keinem
-                        Remote-Zweig liegen.
+                        Remote-Zweig liegen. Nicht erreichbar (nach einem Force-Push):
+                        die Commits des Branches, die auf keinem anderen Remote-Zweig liegen.
   PR_TITLE, PR_BODY     Nur bei pull_request; leer = nicht geprüft.
   BRANCH                Branch-Name; leer = nicht geprüft.
   REPO_DIR              Checkout-Verzeichnis (Standard: aktuelles).
@@ -89,10 +90,22 @@ def pruefe_dateien(repo: Path, muster) -> tuple[int, list[str], int]:
     return namen, fundstellen, geprueft
 
 
-def pruefe_commits(repo: Path, base: str, head: str, muster) -> tuple[list[str], list[str]]:
+def erreichbar(repo: Path, sha: str) -> bool:
+    return subprocess.run(["git", "-C", str(repo), "cat-file", "-e", f"{sha}^{{commit}}"],
+                          capture_output=True).returncode == 0
+
+
+def pruefe_commits(repo: Path, base: str, head: str, muster, branch: str = "") -> tuple[list[str], list[str]]:
     """(Commits mit Treffer in der Nachricht, Commits mit Treffer in hinzugefügten Zeilen)."""
     if not base or base == NULL:
         bereich = ["HEAD", "--not", "--remotes=origin"]
+    elif not erreichbar(repo, base):
+        # Force-Push: der alte Stand ist weg. Im push-Lauf liegt HEAD schon auf
+        # origin/<branch>, deshalb diesen Zweig ausnehmen, sonst bliebe nichts zu prüfen.
+        print("namenswache-ci: BASE_SHA nicht erreichbar (Force-Push?), geprüft werden die "
+              "Commits des Branches, die auf keinem anderen Remote-Zweig liegen")
+        bereich = [head or "HEAD", "--not", *([f"--exclude=origin/{branch}"] if branch else []),
+                   "--remotes=origin"]
     else:
         bereich = [f"{base}..{head or 'HEAD'}"]
     log = git(repo, "log", "--format=%x1e%H%x1f%B%x1f", "-p", "--no-color",
@@ -145,7 +158,7 @@ def main() -> int:
         if namen:
             # Dateinamen enthalten den Begriff selbst — deshalb nicht im Log, nur die Zahl.
             ausgabe("Dateinamen", namen, [])
-        msg_treffer, diff_treffer = pruefe_commits(repo, base, head, muster)
+        msg_treffer, diff_treffer = pruefe_commits(repo, base, head, muster, branch)
         ausgabe("Commit-Nachrichten", len(msg_treffer),
                 [f"Commit {h}" for h in msg_treffer])
         ausgabe("Commit-Diffs (hinzugefügte Zeilen)", len(diff_treffer),
