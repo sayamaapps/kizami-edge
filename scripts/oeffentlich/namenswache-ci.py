@@ -10,7 +10,7 @@ Begriffe und Zeileninhalte erscheinen nie in der Ausgabe.
 
 Umgebung:
   NAMENSWACHE_BEGRIFFE  Pflicht. Ein Muster je Zeile, Groß-/Kleinschreibung egal
-                        (Repo-Secret, Ausgabe von `namenswache.py begriffe --secret`).
+                        (Repo-Secret).
                         Leer = Abbruch mit Exit 2.
   BASE_SHA, HEAD_SHA    Commit-Bereich. Leer oder 0000… = alle Commits, die auf keinem
                         Remote-Zweig liegen. Nicht erreichbar (nach einem Force-Push):
@@ -140,8 +140,7 @@ def main() -> int:
     text = os.environ.get("NAMENSWACHE_BEGRIFFE", "")
     if not text.strip():
         print("namenswache-ci: Secret NAMENSWACHE_BEGRIFFE fehlt oder ist leer — "
-              "nichts geprüft, blockiert. Secret setzen: scripts/oeffentlich/"
-              "namenswache-ci-ausrollen.sh (im privaten Verwaltungs-Repo).", file=sys.stderr)
+              "nichts geprüft, blockiert. Secret im Repo mit diesem Namen setzen.", file=sys.stderr)
         return 2
     try:
         muster = lade_muster(text)
