@@ -1,8 +1,8 @@
-# namenswache — Prüfung auf Kundennamen (Kopie aus dem privaten Verwaltungs-Repo).
-# Diese Datei ist die Vorlage. In jedem öffentlichen Repo als
+# namenswache — Prüfung auf Kundennamen.
+# Diese Datei ist eine Vorlage. In jedem öffentlichen Repo als
 # .github/workflows/namenswache.yml ablegen, zusammen mit
-# scripts/oeffentlich/namenswache-ci.py. Ändert sich eines der beiden, im
-# Verwaltungs-Repo ändern und in alle öffentlichen Repos neu kopieren.
+# scripts/oeffentlich/namenswache-ci.py. Ändert sich eines der beiden, beide
+# gemeinsam in allen öffentlichen Repos aktualisieren.
 # Das Secret NAMENSWACHE_BEGRIFFE liegt im Repo-Secret, nie in einer Datei.
 name: namenswache
 
