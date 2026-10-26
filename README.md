@@ -20,7 +20,7 @@ The sibling of [Kizami](https://github.com/sayamaapps/kirby-kizami) for Kirby: s
 ## Install
 
 ```sh
-npm install git+https://github.com/sayamaapps/kizami-edge.git#v1.0.1
+npm install git+https://github.com/sayamaapps/kizami-edge.git#v1.0.2
 ```
 
 No npm account or token needed; Pages bundles it from `node_modules` on deploy.
