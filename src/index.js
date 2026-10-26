@@ -57,6 +57,19 @@ export function looksLikeBot(userAgent) {
 }
 
 /**
+ * The request comes from this site: Sec-Fetch-Site says same-origin and
+ * Origin, when sent, is this site's origin. Keeps foreign pages from
+ * counting here with navigator.sendBeacon. Headers are set by the browser,
+ * but curl and other clients can send anything: not a security boundary.
+ */
+export function sameSite(request) {
+  const fetchSite = request.headers.get("sec-fetch-site");
+  if (fetchSite && fetchSite !== "same-origin") return false;
+  const origin = request.headers.get("origin");
+  return !origin || origin === new URL(request.url).origin;
+}
+
+/**
  * Host of a referrer -- given as URL or bare host name -- or null.
  * The site's own host is not a source.
  */
@@ -212,7 +225,8 @@ export function middleware(options = {}) {
  *   });
  * Body: { ereignis, detail?, quelle? }. `quelle` lets the page pass
  * document.referrer, because navigator.sendBeacon sends the page itself as
- * Referer. Default detail: a path of this site (sitePath).
+ * Referer. Default detail: a path of this site (sitePath). Requests from
+ * other sites get 403 (sameSite).
  */
 export function beacon({ events = [PAGE_VIEW], detail = sitePath, binding = "DB" } = {}) {
   const allowed = new Set(events);
@@ -220,6 +234,7 @@ export function beacon({ events = [PAGE_VIEW], detail = sitePath, binding = "DB"
   async function onRequestPost({ request, env }) {
     const db = env?.[binding];
     if (db) await forgetOldSalts(db);
+    if (!sameSite(request)) return new Response("cross-site request", { status: 403 });
     if (!db || optedOut(request.headers) || looksLikeBot(request.headers.get("user-agent"))) {
       return new Response(null, { status: 204 });
     }
@@ -240,7 +255,9 @@ export function beacon({ events = [PAGE_VIEW], detail = sitePath, binding = "DB"
     return new Response(null, { status: 204 });
   }
 
-  async function onRequestGet() {
+  async function onRequestGet({ env } = {}) {
+    const db = env?.[binding];
+    if (db) await forgetOldSalts(db);
     return new Response("POST only.", { status: 405 });
   }
 

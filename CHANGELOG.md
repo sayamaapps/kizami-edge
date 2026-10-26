@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- `beacon()`: requests from other sites get `403`. Before, a foreign page could count visitors and
+  events of the site with `navigator.sendBeacon`. Browser-set headers only: a curl-style client can
+  still send anything, so this reduces casual counting and is not a security boundary.
+- `beacon()`: a GET also deletes old salts, like every other request. Before, a site that used only
+  the GET handler kept yesterday's salt until a POST.
+- README: install pin is v1.0.1, the version whose privacy text the README describes. v1.0.0 keeps
+  yesterday's salt until the next counted visit.
+
 ## 1.0.1 (2026-10-10)
 
 - Old salts are now deleted on every request, not only on counted page views. Before, a day

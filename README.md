@@ -20,7 +20,7 @@ The sibling of [Kizami](https://github.com/sayamaapps/kirby-kizami) for Kirby: s
 ## Install
 
 ```sh
-npm install git+https://github.com/sayamaapps/kizami-edge.git#v1.0.0
+npm install git+https://github.com/sayamaapps/kizami-edge.git#v1.0.1
 ```
 
 No npm account or token needed; Pages bundles it from `node_modules` on deploy.
@@ -64,7 +64,9 @@ navigator.sendBeacon("/api/hit", JSON.stringify({
 
 `quelle` exists because `sendBeacon` sends the page itself as `Referer`. `detail` defaults to a path
 of the site (lowercase, digits, `-`, `/`, at most 64 characters); pass `detail: (value) => …` to
-allow something else. Unknown events get `400`.
+allow something else. Unknown events get `400`. Requests from other sites get `403`: the browser
+must say `Sec-Fetch-Site: same-origin`, and an `Origin` header, if sent, must be the site's. This keeps
+foreign pages from counting here; it is not a security boundary, since any client can send any header.
 
 ## Set up
 
