@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.0.2 (2026-10-26)
 
 - `beacon()`: requests from other sites get `403`. Before, a foreign page could count visitors and
   events of the site with `navigator.sendBeacon`. Browser-set headers only: a curl-style client can
