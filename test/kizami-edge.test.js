@@ -214,3 +214,24 @@ test("today's salt survives the cleanup", async () => {
   await serve(middleware(), navigation("https://example.de/robots.txt"), { DB: db });
   assert.equal(db.rows("SELECT COUNT(*) n FROM salz")[0].n, 1);
 });
+
+test("beacon counts only requests from its own site", async () => {
+  const db = testDatabase();
+  const { onRequestPost } = beacon({ events: ["seite"] });
+  const send = (headers) => onRequestPost({ request: post({}, headers), env: { DB: db } });
+  assert.equal((await send({ origin: "https://other.example.org", "sec-fetch-site": "cross-site" })).status, 403);
+  assert.equal((await send({ origin: "https://other.example.org" })).status, 403);
+  assert.equal((await send({ "sec-fetch-site": "cross-site" })).status, 403);
+  assert.equal(db.rows("SELECT COUNT(*) n FROM ereignisse")[0].n, 0, "foreign requests are not counted");
+  assert.equal((await send({ origin: "https://example.de", "sec-fetch-site": "same-origin" })).status, 204);
+  assert.equal(db.rows("SELECT COUNT(*) n FROM ereignisse")[0].n, 1, "the site's own beacon is counted");
+});
+
+test("a GET to the beacon deletes yesterday's salt too", async () => {
+  const db = testDatabase();
+  db.sqlite.exec("INSERT INTO salz (tag, wert) VALUES ('2000-01-01', 'old')");
+  const { onRequestGet } = beacon();
+  const response = await onRequestGet({ request: new Request("https://example.de/api/hit"), env: { DB: db } });
+  assert.equal(response.status, 405);
+  assert.deepEqual(db.rows("SELECT tag FROM salz"), []);
+});
