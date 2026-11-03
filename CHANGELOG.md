@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.3 (2026-11-03)
+
+- `beacon()`: a body that is valid JSON but not an object (`null`, an array, a string, a number) gets
+  `400` like invalid JSON. Before, `null` threw an error and the other shapes were counted as page views.
+
 ## 1.0.2 (2026-10-26)
 
 - `beacon()`: requests from other sites get `403`. Before, a foreign page could count visitors and

@@ -177,6 +177,19 @@ test("beacon rejects unknown events and junk, honours opt-out and skips bots", a
   assert.equal(db.rows("SELECT COUNT(*) n FROM ereignisse")[0].n, 0);
 });
 
+test("beacon rejects JSON that is not an object, and counts {} as one page view", async () => {
+  const db = testDatabase();
+  const { onRequestPost } = beacon();
+  for (const body of [null, [], ["seite"], "x", 42, true]) {
+    const response = await onRequestPost({ request: post(body), env: { DB: db } });
+    assert.equal(response.status, 400, `body ${JSON.stringify(body)}`);
+    assert.equal(db.rows("SELECT COUNT(*) n FROM ereignisse")[0].n, 0, `body ${JSON.stringify(body)} was recorded`);
+  }
+  assert.equal((await onRequestPost({ request: post({}), env: { DB: db } })).status, 204);
+  const events = db.rows("SELECT ereignis FROM ereignisse");
+  assert.deepEqual(events.map((row) => ({ ...row })), [{ ereignis: "seite" }]);
+});
+
 test("schema runs twice without error (existing databases can be upgraded)", async () => {
   const db = testDatabase();
   const { readFileSync } = await import("node:fs");
