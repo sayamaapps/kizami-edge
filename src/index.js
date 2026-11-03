@@ -223,7 +223,8 @@ export function middleware(options = {}) {
  *     events: ["seite", "messstelle"],
  *     detail: (value) => typeof value === "string" ? value.slice(0, 64) : null,
  *   });
- * Body: { ereignis, detail?, quelle? }. `quelle` lets the page pass
+ * Body: { ereignis?, detail?, quelle? }. `ereignis` is a string; left out it
+ * means a page view, any other type gets 400. `quelle` lets the page pass
  * document.referrer, because navigator.sendBeacon sends the page itself as
  * Referer. Default detail: a path of this site (sitePath). Requests from
  * other sites get 403 (sameSite).
@@ -247,7 +248,10 @@ export function beacon({ events = [PAGE_VIEW], detail = sitePath, binding = "DB"
     if (payload === null || typeof payload !== "object" || Array.isArray(payload)) {
       return new Response("invalid request", { status: 400 });
     }
-    const event = String(payload.ereignis || PAGE_VIEW);
+    const event = payload.ereignis === undefined ? PAGE_VIEW : payload.ereignis;
+    if (typeof event !== "string") {
+      return new Response("invalid request", { status: 400 });
+    }
     if (!allowed.has(event)) {
       return new Response("unknown event", { status: 400 });
     }

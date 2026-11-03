@@ -190,6 +190,37 @@ test("beacon rejects JSON that is not an object, and counts {} as one page view"
   assert.deepEqual(events.map((row) => ({ ...row })), [{ ereignis: "seite" }]);
 });
 
+test("beacon takes ereignis only as a string; a missing one counts as a page view", async () => {
+  const db = testDatabase();
+  const { onRequestPost } = beacon();
+  const events = () => db.rows("SELECT ereignis FROM ereignisse").map((row) => row.ereignis);
+  const bodies = [
+    { ereignis: { toString: 1 } }, { ereignis: { valueOf: null, toString: null } }, { ereignis: {} },
+    { ereignis: ["seite"] }, { ereignis: [] }, { ereignis: null }, { ereignis: 0 }, { ereignis: 1 },
+    { ereignis: false }, { ereignis: true }, { ereignis: "" },
+  ];
+  for (const body of bodies) {
+    const response = await onRequestPost({ request: post(body), env: { DB: db } });
+    assert.equal(response.status, 400, `body ${JSON.stringify(body)}`);
+    assert.deepEqual(events(), [], `body ${JSON.stringify(body)} was recorded`);
+  }
+  assert.equal((await onRequestPost({ request: post({ detail: "/a" }), env: { DB: db } })).status, 204);
+  assert.equal((await onRequestPost({ request: post({ ereignis: "seite" }), env: { DB: db } })).status, 204);
+  assert.deepEqual(events(), ["seite", "seite"]);
+});
+
+test("beacon ignores a quelle or detail of the wrong type instead of failing", async () => {
+  const db = testDatabase();
+  const { onRequestPost } = beacon();
+  for (const value of [{ toString: 1 }, ["/a"], 123, true]) {
+    const response = await onRequestPost({ request: post({ quelle: value, detail: value }), env: { DB: db } });
+    assert.equal(response.status, 204, `value ${JSON.stringify(value)}`);
+  }
+  const rows = db.rows("SELECT ereignis, detail, quelle FROM ereignisse");
+  assert.equal(rows.length, 4);
+  for (const row of rows) assert.deepEqual({ ...row }, { ereignis: "seite", detail: null, quelle: null });
+});
+
 test("schema runs twice without error (existing databases can be upgraded)", async () => {
   const db = testDatabase();
   const { readFileSync } = await import("node:fs");
