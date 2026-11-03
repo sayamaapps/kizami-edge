@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.4 (2026-11-03)
+
+- `beacon()`: `ereignis` must be a string. A missing `ereignis` still counts a page view; any other type
+  (object, array, number, boolean, `null`) and the empty string get `400`. Before, an object such as
+  `{"toString":1}` made the handler throw (`500`), an array like `["seite"]` was read as `"seite"`, and
+  `0`, `false`, `null` and `""` were counted as page views.
+
 ## 1.0.3 (2026-11-03)
 
 - `beacon()`: a body that is valid JSON but not an object (`null`, an array, a string, a number) gets

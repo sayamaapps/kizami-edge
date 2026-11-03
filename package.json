@@ -1,6 +1,6 @@
 {
   "name": "kizami-edge",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Cookieless visitor counting for Cloudflare Pages Functions and D1. No browser script, no IP stored, salt lives one day.",
   "type": "module",
   "exports": "./src/index.js",
