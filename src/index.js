@@ -244,7 +244,10 @@ export function beacon({ events = [PAGE_VIEW], detail = sitePath, binding = "DB"
     } catch {
       return new Response("invalid request", { status: 400 });
     }
-    const event = String(payload?.ereignis || PAGE_VIEW);
+    if (payload === null || typeof payload !== "object" || Array.isArray(payload)) {
+      return new Response("invalid request", { status: 400 });
+    }
+    const event = String(payload.ereignis || PAGE_VIEW);
     if (!allowed.has(event)) {
       return new Response("unknown event", { status: 400 });
     }
